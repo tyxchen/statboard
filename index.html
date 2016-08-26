@@ -35,10 +35,13 @@
             <div class="large-2 columns float-left">
               <h5>Game code <select id="select-game"><option>--</option></select></h5>
             </div>
-            <div class="large-1 columns float-left">
+            <div class="large-5 columns button-group float-left">
               <a href="#" class="button primary" data-open="games-create-new">+ New game</a>
+              <a href="#" class="button primary" data-open="games-emport">Import game</a>
+              <a href="#" class="button primary" id="games-export">Export game</a>
+              <a href="#" class="button alert" id="games-delete">Delete game</a>
             </div>
-            <div class="medium-5 columns float-right">
+            <div class="medium-4 columns float-right">
               <ul class="tabs float-right" data-tabs id="games-tabs">
                 <li class="tabs-title is-active"><a href="#games-stats" aria-selected="true">Stats</a></li>
                 <li class="tabs-title"><a href="#games-lineup">Lineup</a></li>
@@ -53,6 +56,12 @@
                 <div id="games-empty-callout" class="callout secondary text-center"><p>No game selected. <a href="#" data-open="games-create-new">Create a new one?</a></p></div>
                 <div class="tabs-panel is-active" id="games-stats">
                   <table id="games-stats-table" class="scroll hover games-stats-table"></table>
+                  <div class="row">
+                    <div class="small-6 columns button-group">
+                      <a href="#" class="button primary" id="games-stats-table-edit-bulk">Edit</a>
+                      <a href="#" class="button primary" id="games-stats-table-save-bulk">Save</a>
+                    </div>
+                  </div>
                 </div>
                 <div class="tabs-panel" id="games-lineup">
                 </div>
@@ -62,6 +71,28 @@
             </div>
           </div>
           
+          <div class="small reveal" id="confirm-action" data-reveal>
+            <h4>Are you sure you want to <span class="action"></span>?</h4>
+            <div class="row"><p>This could have severe consequences!</p></div>
+            <form>
+              <div class="row">
+                <a href="#" class="small-5 button alert" data-confirm>Yes, I do!</a>
+                <a href="#" class="small-5 button secondary float-right" data-cancel data-close>Nope, get me out of here!</a>
+              </div>
+            </form>
+          </div>
+          
+          <div class="large reveal" id="games-emport" data-reveal>
+            <h4>Import/Export</h4>
+            <form>
+              <textarea id="games-emport-text" style="width:100%;height:100%"></textarea>
+              <a href="#" class="button" id="games-import">Import</a>
+            </form>
+            <button class="close-button" data-close aria-label="Close reveal" type="button">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+
           <div class="large reveal" id="games-stats-table-edit" data-reveal>
             <h4><span class="mode"></span> a player for game <span class="game-id"></span></h4>
             <form>
@@ -109,6 +140,7 @@
                 </div>
               </div>
               <div class="row">
+                <button class="button alert float-left" id="games-stats-table-edit-delete">Delete</button>
                 <button class="button float-right" id="games-stats-table-edit-submit">Submit</button>
               </div>
             </form>

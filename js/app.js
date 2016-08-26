@@ -73,7 +73,10 @@
       
       if (id !== undefined) {
         modal.data("player-id", id);
+        $("#games-stats-table-edit-delete").show();
         player = currentGameView[id];
+      } else {
+        $("#games-stats-table-edit-delete").hide();
       }
 
       for (let i of indexes) {
@@ -97,7 +100,7 @@
 
     var populateGames = function(games) {
       $("#select-game").html(games.map((g) => "<option value='" + g.code + "'>" + g.code + "</option>").join(""));
-      $("#select-game").prepend("<option>--</option>");
+      $("#select-game").prepend("<option selected>--</option>");
     };
     
     var loadGame = function(game) {
@@ -200,9 +203,78 @@
     db.games.toArray(populateGames);
     console.table(db.tables);
 
+    $("#confirm-action [data-cancel]").on("click", function() {
+      $("#confirm-action [data-confirm]").off("click");
+      $("#confirm-action .action").text("");
+    });
+
     $("#select-game").on("change", function(e) {
       loadGame($(this).val()).then(function() {
         $("#select-game").children().filter(":not([value])").first().remove();
+      }).catch((err) => { console.error(err); });
+    });
+    
+    $("#games-import").on("click", function(e) {
+      var text = $("#games-emport-text").val(),
+          game = {};
+      
+      try {
+        text = JSON.parse(text);
+      } catch (err) {
+        console.error("Error parsing JSON: " + err.message);
+      }
+      
+      game[text.game.code] = "++id," + searchableIndexes.join(",");
+
+      console.dir(game);
+      db.close();
+      db.version(++DB_VERSION).stores(game);
+      db.open().then(function() {
+        DB.updateVersion(DB_NAME, DB_VERSION);
+        DB.updateSchema(DB_NAME, DB_VERSION, game);
+        
+        console.log("Updated '%s' succesfully to version %d", DB_NAME, DB_VERSION);
+      }).catch(dbErr);
+
+      db.transaction("rw", db.games, db[text.game.code], function() {
+        db.games.add({
+          code: text.game.code,
+          park: text.game.park,
+          date: text.game.date,
+          time: text.game.time
+        });
+        
+        db[text.game.code].bulkAdd(text.body).catch(function (err) {
+          console.error(err.failures.length + " entries failed.");
+          console.table(err.failures);
+        });
+        for (let l of text.body) {
+          console.dir(l);
+        }
+        loadGame(text.game.code).then(() => {
+          $("#select-game").val(text.game.code);
+        }).catch((err) => { console.error(err); });
+      }).then(function() {
+        $("#games-emport").foundation("close");
+        db.games.toArray(populateGames);
+      }).catch(Dexie.OpenFailedError, function (err) {
+        alert("Object store with name '" + text.game.code + "' probably already exists. Wanna try renaming that?");
+      }).catch((err) => { console.error(err); });
+    });
+
+    $("#games-export").on("click", function(e) {
+      var exports = { game: {}, body: [] };
+      
+      db.transaction("r", db.games, db[currentGame], function() {
+        db.games.get(currentGame).then(function(game) {
+          exports.game = jQuery.extend({}, game);
+        });
+        db[currentGame].toArray(function(a) {
+          exports.body = a;
+        });
+      }).then(function() {
+        $("#games-emport-text").text(JSON.stringify(exports));
+        $("#games-emport").foundation("open");
       }).catch((err) => { console.error(err); });
     });
 
@@ -220,6 +292,40 @@
       }
     });
     
+    $("#games-delete").on("click", function(e) {
+      var store = {};
+      store[currentGame] = null;
+      
+      $("#confirm-action [data-confirm]").on("click", function() {
+        db.transaction("rw", db.games, function() {
+          db.games.delete(currentGame);
+        }).then(function() {
+          db.close();
+          db.version(++DB_VERSION).stores(store);
+          db.open().then(function() {
+            DB.updateVersion(DB_NAME, DB_VERSION);
+            DB.updateSchema(DB_NAME, DB_VERSION, store);
+            
+            console.log("Updated '%s' succesfully to version %d", DB_NAME, DB_VERSION);
+            
+            window.location.reload();
+          }).catch(dbErr);
+        }).catch((err) => { console.error(err); });
+      });
+      
+      $("#confirm-action .action").text("delete game " + currentGame);
+      $("#confirm-action").foundation("open");
+    });
+    
+    $("#games-stats-table-edit-delete").on("click", function(e) {
+      db.transaction("rw", db[currentGame], function() {
+        db[currentGame].delete($("#games-stats-table-edit").data("player-id"));
+      }).then(function() {
+        $("#games-stats-table-edit").foundation("close");
+        loadGame(currentGame).catch((err) => { console.error(err); });
+      });
+    });
+
     $("#games-stats-table-edit-submit").on("click", function(e) {
       var player = {},
           game = currentGame;
@@ -246,7 +352,7 @@
         });
         
         if ($("#games-stats-table-edit").data("player-id") !== undefined) {
-          player.id = parseInt($("#games-stats-table-edit").data("player-id"));
+          player.id = $("#games-stats-table-edit").data("player-id");
         }
         
         player.HCp = (parseInt(player.HCn) / parseInt(player.BIP) * 100).toFixed(1);

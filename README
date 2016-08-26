@@ -1,12 +1,21 @@
 Statboard
 =========
 
-This was a project designed to provide a browser-side statistics dashboard for my softball team. It was built with Foundation, IndexedDB and food.
+This was a project designed to provide a browser-side statistics dashboard for
+my softball team. It was built with Foundation, IndexedDB and food.
 
-The initial version was hacked together in less than 20 man hours (read: your standard hackathon), half of which were spent deciphering IndexedDB. Thus, the source code is extremely messy and undocumented. It is, however, functional.
+The initial version was hacked together in less than 20 man hours (read: your
+standard hackathon), half of which were spent deciphering IndexedDB. Thus, the
+source code is extremely messy and undocumented. It is, however, functional.
 
-Because this app runs entirely on the browser side, without any backend (other than a primitive server for the files), it can be used offline. As a side effect of the architecture of this dashboard, it also happens to abuse IndexedDB's versioning system. In other words, this app is not to be used in a professional setting without debugging tools, because it will break.
+Because this app runs entirely on the browser side, without any backend (other
+than a primitive server for the files), it can be used offline. As a side
+effect of the architecture of this dashboard, it also happens to abuse
+IndexedDB's versioning system. In other words, this app is not to be used in a
+professional setting without debugging tools, because it will break.
 
-I hope you enjoyed this README. If you wish to torture yourself, I invite you to read the source code. All others should most definitely stay away from this project.
+I hope you enjoyed this README. If you wish to torture yourself, I invite you
+to read the source code. All others should most definitely stay away from this
+project.
 
 Copyright (c) 2016 tyxchen, under the terms and conditions of the MIT License.
