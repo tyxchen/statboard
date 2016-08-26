@@ -76,6 +76,7 @@
         $("#games-stats-table-edit-delete").show();
         player = currentGameView[id];
       } else {
+	modal.data("player-id", "");
         $("#games-stats-table-edit-delete").hide();
       }
 
@@ -351,7 +352,7 @@
           }
         });
         
-        if ($("#games-stats-table-edit").data("player-id") !== undefined) {
+        if ($("#games-stats-table-edit").data("player-id") !== undefined && $("#games-stats-table-edit").data("player-id") !== "") {
           player.id = $("#games-stats-table-edit").data("player-id");
         }
         
