@@ -1,0 +1,58 @@
+html, body, h1, h2, h3, h4, h5, h6 {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+
+.footnote {
+  color: #acacac;
+  font-size: 0.9rem;
+  vertical-align: bottom;
+}
+
+.tabs {
+  border-radius: 3px;
+}
+
+.no-border {
+  border: 0;
+}
+
+.top-bar,
+.top-bar .menu,
+.top-bar .tabs,
+.top-bar .tabs-title > a:hover {
+  background-color: #2ba6cb;
+}
+.top-bar .tabs {
+  border-color: rgba(0, 0, 0, 0.2);
+}
+.top-bar .tabs-title.is-active > a {
+  background-color: #2285a2;
+}
+.top-bar .menu-text,
+.top-bar .tabs-title a {
+  color: white;
+}
+
+#select-game {
+  display: inline-block;
+  width: 100px;
+}
+
+.games-stats-table input,
+.games-stats-table select {
+  height: 2rem;
+  padding: 0;
+  margin: 0;
+  box-shadow: none;
+}
+
+#games-stats-table-new-player,
+#games-stats-table tr:hover [data-field='name'] {
+  background-color: rgb(213, 237, 245);
+  transition: 0.3s;
+  cursor: pointer;
+}
+#games-stats-table-new-player:hover,
+#games-stats-table tr:hover [data-field='name']:hover {
+  background-color: rgb(191, 228, 239);
+}

@@ -1,0 +1,11 @@
+{
+  "name": "statboard",
+  "version": "0.0.1",
+  "description": "Stats dashboard for softball teams",
+  "main": "/",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT"
+}

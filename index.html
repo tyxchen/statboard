@@ -1,0 +1,191 @@
+<!doctype html>
+<html class="no-js" lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="version" content="0.0.1">
+
+    <title>Statboard</title>
+
+    <link rel="stylesheet" href="css/foundation.css">
+    <link rel="stylesheet" href="css/app.css">
+  </head>
+  <body>
+    <div class="top-bar">
+      <div class="top-bar-left">
+        <ul class="menu">
+          <li class="menu-text">Statboard</li>
+          <li>
+            <ul class="tabs" data-tabs id="page-tabs">
+              <li class="tabs-title is-active"><a href="#games" aria-selected="true">Games</a></li>
+              <li class="tabs-title"><a href="#team">Team</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+    
+    <main>
+      <div class="tabs-content no-border" data-tabs-content="page-tabs">
+        <div class="tabs-panel is-active" id="games">
+          <h4>Games</h4>
+          
+          <div class="expanded row">
+            <div class="large-2 columns float-left">
+              <h5>Game code <select id="select-game"><option>--</option></select></h5>
+            </div>
+            <div class="large-1 columns float-left">
+              <a href="#" class="button primary" data-open="games-create-new">+ New game</a>
+            </div>
+            <div class="medium-5 columns float-right">
+              <ul class="tabs float-right" data-tabs id="games-tabs">
+                <li class="tabs-title is-active"><a href="#games-stats" aria-selected="true">Stats</a></li>
+                <li class="tabs-title"><a href="#games-lineup">Lineup</a></li>
+                <li class="tabs-title"><a href="#games-plays">Play-by-play</a></li>
+              </ul>
+            </div>
+          </div>
+          
+          <div class="expanded row">
+            <div class="small-12 columns">
+              <div class="tabs-content no-border" data-tabs-content="games-tabs">
+                <div id="games-empty-callout" class="callout secondary text-center"><p>No game selected. <a href="#" data-open="games-create-new">Create a new one?</a></p></div>
+                <div class="tabs-panel is-active" id="games-stats">
+                  <table id="games-stats-table" class="scroll hover games-stats-table"></table>
+                </div>
+                <div class="tabs-panel" id="games-lineup">
+                </div>
+                <div class="tabs-panel" id="games-plays">
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="large reveal" id="games-stats-table-edit" data-reveal>
+            <h4><span class="mode"></span> a player for game <span class="game-id"></span></h4>
+            <form>
+              <div class="row">
+                <div class="medium-12 columns">
+                  <div class="expanded row">
+                    <div class="medium-4 small-4 columns float-left"><label class="middle">Name</label></div>
+                    <div class="medium-2 small-3 columns float-left"><label class="middle">№</label></div>
+                    <div class="medium-2 small-3 columns float-left"><label class="middle">Position</label></div>
+                    <div class="medium-4 small-2 columns float-left"><label class="middle">Batting</label></div>
+                  </div>
+                  <div class='expanded row'>
+                    <div class='medium-4 small-4 columns'>
+                      <input type='text' data-field='name' placeholder='Cherry Ten'>
+                    </div>
+                    <div class='medium-2 small-3 columns'>
+                      <input type='number' data-field='num' min='00' max='99' placeholder='00'>
+                    </div>
+                    <div class='medium-2 small-3 columns'>
+                      <select data-field='position' onchange='$(this).children().filter(":not([value])").first().remove()'>
+                        <option>--</option>
+                        <option value='BC'>BC</option>
+                        <option value='1B'>1B</option>
+                        <option value='2B'>2B</option>
+                        <option value='3B'>3B</option>
+                        <option value='SS'>SS</option>
+                        <option value='LF'>LF</option>
+                        <option value='LR'>LR</option>
+                        <option value='CF'>CF</option>
+                        <option value='RF'>RF</option>
+                        <option value='RR'>RR</option>
+                      </select>
+                    </div>
+                    <div class='medium-2 small-2 columns'>
+                      <input type='number' data-field='batting'>
+                    </div>
+                    <div class='medium-2 small-2 columns'>
+                      <label><input type='checkbox' data-field='shared'>Spot shared</label>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <table class="scroll games-stats-table" id="games-stats-table-edit-stats">
+                    </table>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <button class="button float-right" id="games-stats-table-edit-submit">Submit</button>
+              </div>
+            </form>
+            <button class="close-button" data-close aria-label="Close reveal" type="button">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          
+          <div class="large reveal" id="games-create-new" data-reveal>
+            <h4>Create a new game</h4>
+            <form>
+              <div class="row">
+                <div class="small-2 columns float-left">
+                  <label for="games-create-new-code" class="text-right middle">Game Code:</label>
+                </div>
+                <div class="small-5 columns float-left">
+                  <input type="text" id="games-create-new-code" placeholder="X0102">
+                </div>
+                <div class="small-2 columns float-left">
+                  <label for="games-create-new-park" class="text-right middle">Game Park:</label>
+                </div>
+                <div class="small-3 columns float-left">
+                  <input type="text" id="games-create-new-park" placeholder="Skydome">
+                </div>
+              </div>
+              <div class="row">
+                <div class="small-2 columns float-left">
+                  <label for="games-create-new-date" class="text-right middle">Game Date:</label>
+                </div>
+                <div class="small-5 columns float-left">
+                  <input type="text" id="games-create-new-date" placeholder="2016-07-01">
+                </div>
+                <div class="small-2 columns float-left">
+                  <label for="games-create-new-time" class="text-right middle">Game Time:</label>
+                </div>
+                <div class="small-3 columns float-left">
+                  <select id="games-create-new-time">
+                    <option>--</option>
+                    <option value="2">2pm</option>
+                    <option value="4">4pm</option>
+                    <option value="6">6pm</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row">
+                <div class="medium-2 columns">
+                  <label class="text-right middle">Lineup:</label>
+                </div>
+                <div class="medium-10 columns">
+                  <div class="expanded row">
+                    <div class="medium-6 small-4 columns float-left"><label class="middle">Name</label></div>
+                    <div class="medium-2 small-3 columns float-left"><label class="middle">№</label></div>
+                    <div class="medium-2 small-3 columns float-left"><label class="middle">Position</label></div>
+                  </div>
+                  <div class="expanded row" style="max-height:70vh;overflow-y:auto"></div>
+                  <button class="button hollow" id="games-create-new-add">Add a player</button>
+                </div>
+              </div>
+              <div class="row">
+                <span class="footnote">Stats may be filled in after the game is created.</span>
+                <button class="button float-right" id="games-create-new-submit">Submit</button>
+              </div>
+            </form>
+            <button class="close-button" data-close aria-label="Close reveal" type="button">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        </div>
+        <div class="tabs-panel" id="team">
+        </div>
+      </div>
+    </main>
+
+    <script src="js/vendor/jquery.js"></script>
+    <script src="js/vendor/what-input.js"></script>
+    <script src="js/vendor/foundation.js"></script>
+    <script src="js/vendor/dexie.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
