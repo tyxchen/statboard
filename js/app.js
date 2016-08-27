@@ -178,6 +178,7 @@
         $("#games-empty-callout").remove();
         
         currentGame = game;
+	localStorage.setItem("DB_CURRENT_GAME", currentGame);
 
         return;
       });
@@ -203,6 +204,14 @@
     db.open().catch(dbErr);
     db.games.toArray(populateGames);
     console.table(db.tables);
+
+    if (!!localStorage.getItem("DB_CURRENT_GAME")) {
+      loadGame(localStorage.getItem("DB_CURRENT_GAME"));
+    }
+
+    $("a[href='#']").on("click", function(e) {
+      e.preventDefault();
+    });
 
     $("#confirm-action [data-cancel]").on("click", function() {
       $("#confirm-action [data-confirm]").off("click");
@@ -474,4 +483,7 @@
   
   $(document).foundation();
   APP.GAMES();
+  setTimeout(() => {
+    $("#loading").fadeOut();
+  }, 1000);
 })();
