@@ -287,26 +287,12 @@
         $("#games-emport").foundation("open");
       }).catch((err) => { console.error(err); });
     });
-
-    $("#games-stats-table").on("click", function(e) {
-      if (!!e.target) {
-        var $t = $(e.target);
-        
-        e.stopPropagation();
-        
-        if ($t.is("[data-field='name']")) {
-          editRow($t.closest("tr").data("player-id"));
-        } else if ($t.is("#games-stats-table-new-player td")) {
-          editRow();
-        }
-      }
-    });
     
     $("#games-delete").on("click", function(e) {
       var store = {};
       store[currentGame] = null;
       
-      $("#confirm-action [data-confirm]").on("click", function() {
+      $("#confirm-action [data-action='confirm']").on("click", function() {
         db.transaction("rw", db.games, function() {
           db.games.delete(currentGame);
         }).then(function() {
@@ -325,6 +311,75 @@
       
       $("#confirm-action .action").text("delete game " + currentGame);
       $("#confirm-action").foundation("open");
+    });
+    
+    $("#games-stats-table").on("click", function(e) {
+      if (!!e.target) {
+        if (!$(this).hasClass("editing")) {
+          let $t = $(e.target);
+          
+          e.stopPropagation();
+          
+          if ($t.is("[data-field]")) {
+            editRow($t.closest("tr").data("player-id"));
+            $("#games-stats-table-edit [data-field='" + $t.data("field") + "']").trigger("focus").trigger("select");
+          } else if ($t.is("#games-stats-table-new-player td")) {
+            editRow();
+          }
+        } else {
+          $(e.target).trigger("select");
+        }
+      }
+    });
+    
+    $(".games-stats-table").on("keydown", function(e) {
+      var t = e.target;
+
+      if ($(this).hasClass("editing") && !!t && t.hasAttribute("data-field")) {
+        switch (e.which) {
+        case 37:
+        case 39:
+          e.preventDefault();
+          let $el = e.which === 37 ? $(t).parent().prev() : $(t).parent().next();
+          $el.children("[data-field]").trigger("focus").trigger("select");
+          break;
+        case 38:
+        case 40:
+          e.preventDefault();
+          if (e.ctrlKey) {
+            let v = parseInt($(t).val());
+            $(t).val(v + (39 - e.which)).trigger("select");
+          } else {
+            let $el = e.which === 38 ? $(t).closest("tr").prev() : $(t).closest("tr").next();
+            $el.find("[data-field='" + t.getAttribute("data-field") + "']").trigger("focus").trigger("select");
+          }
+          break;
+        case 13:
+          e.preventDefault();
+          break;
+        }
+      }
+    });
+    
+    $("#games-stats-table").on("keydown", function(e) {
+      var t = e.target;
+
+      if ($(this).hasClass("editing") && !!t && t.hasAttribute("data-field")) {
+        switch (e.which) {
+        case 13:
+          e.preventDefault();
+          if (e.ctrlKey) {
+            $("#games-stats-table-bulk [data-action='save']").trigger("click");
+          } else {
+            $(t).closest("tr").next().find("[data-field='" + t.getAttribute("data-field") + "']").trigger("focus").trigger("select");
+          }
+          break;
+        case 27:
+          e.preventDefault();
+          $("#games-stats-table-bulk [data-action='edit']").trigger("click");
+          break;
+        }
+      }
     });
     
     $("#games-stats-table-edit-delete").on("click", function(e) {
@@ -375,6 +430,92 @@
         $("#games-stats-table-edit").foundation("close");
         loadGame(game).catch((err) => { console.error(err); });
       });
+    });
+    
+    $("#games-stats-table-bulk .button").on("click", function(e) {
+      var action = $(this).data("action"),
+          table = $("#games-stats-table"),
+          _this = this;
+      
+      if (action === "edit" && !table.hasClass("editing")) {
+        let header = [],
+            body = [];
+
+        for (let i of indexes) {
+          i = i[0].toUpperCase() + i.slice(1);
+          
+          if (i.length > 4) {
+            i = i.slice(0, 3) + ".";
+          }
+          
+          header.push("<th>" + i + "</th>");
+        }
+        for (let s of stats) {
+          // ignore dynamically generated properties
+          if (s !== "HCp" && s !== "Fp" && s !== "GBFp" && s !== "FFp") {
+            header.push("<th style='min-width:60px'><abbr title='" + statDefs[s] + "'>" + s + "</abbr></th>");
+          }
+        }
+        
+        table.find("[data-player-id]").each(function(i, e) {
+          var p = currentGameView[this.getAttribute("data-player-id")];
+          
+          body.push("<tr data-player-id='" + this.getAttribute("data-player-id") + "'>");
+          for (let i of indexes) {
+            body.push("<td>" + p[i] + "</td>");
+          }
+          for (let s of stats) {
+            // ignore dynamically generated properties
+            if (s !== "HCp" && s !== "Fp" && s !== "GBFp" && s !== "FFp") {
+              body.push("<td><input type='number' data-field='" + s + "' value='" + p[s] + "'></td>");
+            }
+          }
+          body.push("</tr>");
+        });
+        
+        table.children("thead").html("<tr>" + header.join("") + "</tr>");
+        table.children("tbody").html(body.join(""));
+        table.addClass("editing");
+        $(this).text("Cancel");
+        $(this).next().show();
+      } else if (action === "edit" && table.hasClass("editing")) {
+        loadGame(currentGame).then(function() { // reset to unsaved
+          table.removeClass("editing");
+          $(_this).text("Edit");
+          $(_this).next().hide();
+        });
+      } else if (action === "save" && table.hasClass("editing")) {
+        let players = [];
+
+        table.find("[data-player-id]").each(function(i, e) {
+          let player = currentGameView[this.getAttribute("data-player-id")];
+
+          $(this).find("[data-field]").each(function(ii, ee) {
+            player[this.getAttribute("data-field")] = this.value;
+          });
+          
+          player.HCp = (parseInt(player.HCn) / parseInt(player.BIP) * 100).toFixed(1);
+          player.GBFp = (parseInt(player.GBFS) / parseInt(player.GBFA) * 100).toFixed(1);
+          player.FFp = (parseInt(player.FFS) / parseInt(player.FFA) * 100).toFixed(1);
+          player.Fp = ((parseInt(player.GBFp) + parseInt(player.FFp)) / 2).toFixed(1);
+          
+          players.push(player);
+        });
+        
+        console.dir(players);
+        // db.transaction("rw", db[currentGame], function() {
+          db[currentGame].bulkPut(players).catch(function (err) {
+            console.error(err.failures.length + " entries failed.");
+            console.table(err.failures);
+          });
+        // }).then(function() {
+          loadGame(currentGame).then(function() {
+            table.removeClass("editing");
+            $(_this).prev().text("Edit");
+            $(_this).hide();
+          }).catch((err) => { console.error(err); });
+        // }).catch((err) => { console.error(err); });
+      }
     });
 
     $("#games-create-new-add").on("click", function(e) {

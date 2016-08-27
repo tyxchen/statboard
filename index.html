@@ -57,9 +57,9 @@
                 <div class="tabs-panel is-active" id="games-stats">
                   <table id="games-stats-table" class="scroll hover games-stats-table"></table>
                   <div class="row">
-                    <div class="small-6 columns button-group">
-                      <a href="#" class="button primary" id="games-stats-table-edit-bulk">Edit</a>
-                      <a href="#" class="button primary" id="games-stats-table-save-bulk">Save</a>
+                    <div class="small-6 columns button-group" id="games-stats-table-bulk">
+                      <a href="#" class="button primary" data-action="edit">Edit</a>
+                      <a href="#" class="button success" data-action="save" style="display:none">Save</a>
                     </div>
                   </div>
                 </div>
@@ -76,8 +76,8 @@
             <div class="row"><p>This could have severe consequences!</p></div>
             <form>
               <div class="row">
-                <a href="#" class="small-5 button alert" data-confirm>Yes, I do!</a>
-                <a href="#" class="small-5 button secondary float-right" data-cancel data-close>Nope, get me out of here!</a>
+                <a href="#" class="small-5 button alert" data-action="confirm">Yes, I do!</a>
+                <a href="#" class="small-5 button secondary float-right" data-action="cancel" data-close>Nope, get me out of here!</a>
               </div>
             </form>
           </div>
@@ -134,7 +134,7 @@
                     </div>
                   </div>
                   <div class="row">
-                    <table class="scroll games-stats-table" id="games-stats-table-edit-stats">
+                    <table class="scroll games-stats-table editing" id="games-stats-table-edit-stats">
                     </table>
                   </div>
                 </div>
@@ -214,7 +214,7 @@
       </div>
     </main>
     
-    <div id="loading" style="position:fixed;top:0;left:0;bottom:0;right:0;background-color:rgba(255,255,255,0.8)"><div style="position:absolute;top:50%;left:50%;text-align:center;transform:translateX(-50%) translateY(-50%);"><h5>Loading...</h5></div></div>
+    <div id="loading" style="position:fixed;top:0;left:0;bottom:0;right:0;background-color:rgba(255,255,255,0.9)"><div style="position:absolute;top:50%;left:50%;text-align:center;transform:translateX(-50%) translateY(-50%);"><h5>Loading...</h5></div></div>
 
     <script src="js/vendor/jquery.js"></script>
     <script src="js/vendor/what-input.js"></script>

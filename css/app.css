@@ -46,13 +46,17 @@ html, body, h1, h2, h3, h4, h5, h6 {
   box-shadow: none;
 }
 
-#games-stats-table-new-player,
-#games-stats-table tr:hover [data-field='name'] {
-  background-color: rgb(213, 237, 245);
-  transition: 0.3s;
+#games-stats-table tr {
   cursor: pointer;
 }
+#games-stats-table-new-player,
+#games-stats-table tr:hover td[data-field] {
+  transition: 0.3s;
+}
+#games-stats-table-new-player {
+  background-color: rgb(213, 237, 245);
+}
 #games-stats-table-new-player:hover,
-#games-stats-table tr:hover [data-field='name']:hover {
+#games-stats-table tr:hover td[data-field]:hover {
   background-color: rgb(191, 228, 239);
 }
