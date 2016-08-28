@@ -76,7 +76,7 @@
         $("#games-stats-table-edit-delete").show();
         player = currentGameView[id];
       } else {
-	modal.data("player-id", "");
+        modal.data("player-id", "");
         $("#games-stats-table-edit-delete").hide();
       }
 
@@ -104,10 +104,87 @@
       $("#select-game").prepend("<option selected>--</option>");
     };
     
+    var sortTable = function(table, key, dir) {
+      return table.sort(function(a, b) {
+        if (!isNaN(a[key]) && !isNaN(b[key])) {
+          return dir * (a[key] - b[key]);
+        }
+        return dir * (a[key] >= b[key] ? 1 : -1);
+      });
+    };
+    
+    var loadTable = function(players, sortKey, sortDir) {
+      var builder = ["<thead><tr>"];
+
+      sortKey = sortKey || "batting";
+      sortDir = (sortDir !== undefined && sortDir !== null ? sortDir : 1);
+      
+      if (!Array.isArray(players)) {
+        players = Object.keys(players).map((k) => players[k]);
+      }
+      players = sortTable(players, sortKey, sortDir);
+
+      for (let ind of indexes.concat(stats)) {
+        let name = ind;
+
+        if (indexes.indexOf(name) !== -1) {
+          name = name[0].toUpperCase() + name.slice(1);
+          
+          if (name.length > 4) {
+            name = name.slice(0, 3) + ".";
+          }
+        }
+
+        if (["HCn", "GBFA", "GBFS", "FFA", "FFS"].indexOf(name) === -1) {
+          builder.push("<th data-name='" + ind + "'>");
+          if (stats.indexOf(name) !== -1) {
+            builder.push("<abbr title='" + statDefs[name] + "'>" + (name.slice(-1) === "p" ? name.slice(0, -1) + "%" : name) + "</abbr>");
+          } else {
+            builder.push(name);
+          }
+          builder.push("</th>");
+        }
+      }
+
+      builder.push("</tr></thead><tbody>");
+
+      for (let p of players) {
+        builder.push("<tr data-player-id='" + p.id + "'>");
+        
+        for (let s of stats) {
+          p[s] = parseInt(p[s]);
+        }
+        
+        for (let k of indexes.concat(stats)) {
+          switch (k) {
+          case "HCn":
+          case "GBFA":
+          case "GBFS":
+          case "FFA":
+          case "FFS":
+            continue;
+          case "HCp":
+          case "Fp":
+          case "GBFp":
+          case "FFp":
+            builder.push("<td data-field='" + k + "'>" + p[k] + "%</td>");
+            break;
+          default:
+            builder.push("<td data-field='" + k + "'>" + p[k] + "</td>");
+          }
+        }
+        builder.push("</tr>");
+      }
+      
+      builder.push("<tr id='games-stats-table-new-player'><td colspan='" + indexes.concat(stats).length + "'>+ Add a new player</td></tr>");
+      builder.push("</tbody>");
+      
+      $("#games-stats-table").html(builder.join(""));
+    };
+    
     var loadGame = function(game) {
       var players = [],
-          builder = ["<thead><tr>"],
-          body = ["<tbody><tr>"];
+          builder = ["<thead><tr>"];
       
       return db.transaction("r", db[game], function() {
         console.log("Game '%s' selected.", game);
@@ -115,70 +192,21 @@
           players = p;
         });
       }).then(function() {
-        players = players.sort(function(a, b) {
-          return a.batting - b.batting;
-        });
-
-        for (let name of indexes.concat(stats)) {
-          if (indexes.indexOf(name) !== -1) {
-            name = name[0].toUpperCase() + name.slice(1);
-            
-            if (name.length > 4) {
-              name = name.slice(0, 3) + ".";
-            }
-          }
-
-          if (["HCn", "GBFA", "GBFS", "FFA", "FFS"].indexOf(name) === -1) {
-            builder.push("<th>");
-            if (stats.indexOf(name) !== -1) {
-              builder.push("<abbr title='" + statDefs[name] + "'>" + (name.slice(-1) === "p" ? name.slice(0, -1) + "%" : name) + "</abbr>");
-            } else {
-              builder.push(name);
-            }
-            builder.push("</th>");
-          }
-        }
-
-        builder.push("</tr></thead><tbody>");
-
+        loadTable(players);
+        
         for (let p of players) {
           currentGameView[p.id] = p;
-
-          builder.push("<tr data-player-id='" + p.id + "'>");
-          
-          for (let s of stats) {
-            p[s] = parseInt(p[s]);
-          }
-          
-          for (let k of indexes.concat(stats)) {
-            switch (k) {
-            case "HCn":
-            case "GBFA":
-            case "GBFS":
-            case "FFA":
-            case "FFS":
-              continue;
-            case "HCp":
-            case "Fp":
-            case "GBFp":
-            case "FFp":
-              builder.push("<td data-field='" + k + "'>" + p[k] + "%</td>");
-              break;
-            default:
-              builder.push("<td data-field='" + k + "'>" + p[k] + "</td>");
-            }
-          }
-          builder.push("</tr>");
         }
-        
-        builder.push("<tr id='games-stats-table-new-player'><td colspan='" + indexes.concat(stats).length + "'>+ Add a new player</td></tr>");
-        builder.push("</tbody>");
-        
-        $("#games-stats-table").data("game-id", game).html(builder.join(""));
+
+        $("#games-stats-table").data("game-id", game);
         $("#games-empty-callout").remove();
         
         currentGame = game;
-	localStorage.setItem("DB_CURRENT_GAME", currentGame);
+        localStorage.setItem("DB_CURRENT_GAME", currentGame);
+
+        db.games.toArray(populateGames).then(function() {
+          $("#select-game").val(game);
+        });
 
         return;
       });
@@ -202,12 +230,13 @@
 
     db.version(DB_VERSION);
     db.open().catch(dbErr);
-    db.games.toArray(populateGames);
+    db.games.toArray(populateGames).then(function() {
+      if (!!localStorage.getItem("DB_CURRENT_GAME")) {
+        loadGame(localStorage.getItem("DB_CURRENT_GAME"));
+      }
+    });
+    
     console.table(db.tables);
-
-    if (!!localStorage.getItem("DB_CURRENT_GAME")) {
-      loadGame(localStorage.getItem("DB_CURRENT_GAME"));
-    }
 
     $("a[href='#']").on("click", function(e) {
       e.preventDefault();
@@ -219,9 +248,8 @@
     });
 
     $("#select-game").on("change", function(e) {
-      loadGame($(this).val()).then(function() {
-        $("#select-game").children().filter(":not([value])").first().remove();
-      }).catch((err) => { console.error(err); });
+      $(this).children(":not([value])").first().remove();
+      loadGame($(this).val()).catch((err) => { console.error(err); });
     });
     
     $("#games-import").on("click", function(e) {
@@ -261,12 +289,9 @@
         for (let l of text.body) {
           console.dir(l);
         }
-        loadGame(text.game.code).then(() => {
-          $("#select-game").val(text.game.code);
-        }).catch((err) => { console.error(err); });
+        loadGame(text.game.code).catch((err) => { console.error(err); });
       }).then(function() {
         $("#games-emport").foundation("close");
-        db.games.toArray(populateGames);
       }).catch(Dexie.OpenFailedError, function (err) {
         alert("Object store with name '" + text.game.code + "' probably already exists. Wanna try renaming that?");
       }).catch((err) => { console.error(err); });
@@ -325,6 +350,12 @@
             $("#games-stats-table-edit [data-field='" + $t.data("field") + "']").trigger("focus").trigger("select");
           } else if ($t.is("#games-stats-table-new-player td")) {
             editRow();
+          } else if ($t.is("abbr,th")) {
+            let sortKey = $t.closest("th").data("name"),
+                sortDir = parseInt($t.closest("th").attr("data-sort-dir")) || -1;
+            
+            loadTable(currentGameView, sortKey, -sortDir);
+            $("th[data-name='" + sortKey + "']").attr("data-sort-dir", -sortDir);
           }
         } else {
           $(e.target).trigger("select");
@@ -386,8 +417,9 @@
       db.transaction("rw", db[currentGame], function() {
         db[currentGame].delete($("#games-stats-table-edit").data("player-id"));
       }).then(function() {
+        delete currentGameView[$("#games-stats-table-edit").data("player-id")];
+        loadTable(currentGameView);
         $("#games-stats-table-edit").foundation("close");
-        loadGame(currentGame).catch((err) => { console.error(err); });
       });
     });
 
@@ -427,8 +459,9 @@
         
         db[game].put(player);
       }).then(function() {
-        $("#games-stats-table-edit").foundation("close");
-        loadGame(game).catch((err) => { console.error(err); });
+        loadGame(game).then(function() {
+          $("#games-stats-table-edit").foundation("close");
+        }).catch((err) => { console.error(err); });
       });
     });
     
@@ -479,11 +512,10 @@
         $(this).text("Cancel");
         $(this).next().show();
       } else if (action === "edit" && table.hasClass("editing")) {
-        loadGame(currentGame).then(function() { // reset to unsaved
-          table.removeClass("editing");
-          $(_this).text("Edit");
-          $(_this).next().hide();
-        });
+        loadTable(currentGameView); // reset to unsaved
+        table.removeClass("editing");
+        $(_this).text("Edit");
+        $(_this).next().hide();
       } else if (action === "save" && table.hasClass("editing")) {
         let players = [];
 
@@ -530,7 +562,7 @@
             "<input type='number' id='games-create-new-" + c + "-num' min='00' max='99' placeholder='00'>",
           "</div>",
           "<div class='medium-2 small-3 columns'>",
-            "<select id='games-create-new-" + c + "-position' onchange='$(this).children().filter(\":not([value])\").first().remove()'>",
+            "<select id='games-create-new-" + c + "-position' onchange='$(this).children(\":not([value])\").remove()'>",
               "<option>--</option>",
               "<option value='BC'>BC</option>",
               "<option value='1B'>1B</option>",
@@ -545,7 +577,7 @@
             "</select>",
           "</div>",
           "<div class='small-1 columns'>",
-            "<span class='button hollow alert games-create-new-remove-player'>🗑</span>",
+            "<span class='button hollow alert games-create-new-remove-player'><i class='fi-trash'></i></span>",
           "</div>",
         "</div>"
       ].join(""));
@@ -553,7 +585,7 @@
     });
 
     $("#games-create-new .expanded.row").on("click", function(e) {
-      if (!!e.target && $(e.target).is(".games-create-new-remove-player")) {
+      if (!!e.target && ($(e.target).is(".games-create-new-remove-player") || $(e.target).parent().is(".games-create-new-remove-player"))) {
         e.stopPropagation();
         $(e.target).closest(".expanded.row").remove();
       }
@@ -609,12 +641,9 @@
           for (let l of lineup) {
             console.dir(l);
           }
-          loadGame(code).then(() => {
-            $("#select-game").val(code);
-          }).catch((err) => { console.error(err); });
+          loadGame(code).catch((err) => { console.error(err); });
         }).then(function() {
           $("#games-create-new").foundation("close");
-          db.games.toArray(populateGames);
         }).catch(function (err) {
           console.error(err);
         });

@@ -46,6 +46,18 @@ html, body, h1, h2, h3, h4, h5, h6 {
   box-shadow: none;
 }
 
+#games-stats-table th {
+  box-sizing: border-box;
+  border: solid transparent;
+  border-width: 3px 0;
+}
+#games-stats-table th[data-sort-dir="1"] {
+  border-top: 3px solid #2ba6cb;
+}
+#games-stats-table th[data-sort-dir="-1"] {
+  border-bottom: 3px solid #2ba6cb;
+}
+
 #games-stats-table tr {
   cursor: pointer;
 }
