@@ -297,7 +297,7 @@
       }).catch((err) => { console.error(err); });
     });
 
-    $("#games-export").on("click", function(e) {
+    $("#games-export, #games-export-json").on("click", function(e) {
       var exports = { game: {}, body: [] };
       
       db.transaction("r", db.games, db[currentGame], function() {
@@ -308,9 +308,47 @@
           exports.body = a;
         });
       }).then(function() {
-        $("#games-emport-text").text(JSON.stringify(exports));
+        $("#games-emport-text").val(JSON.stringify(exports));
+        $("#games-export-json").removeClass("hollow");
+        $("#games-export-csv").addClass("hollow");
         $("#games-emport").foundation("open");
       }).catch((err) => { console.error(err); });
+    });
+    
+    $("#games-export-csv").on("click", function(e) {
+      var exports = { game: {}, body: {} };
+      
+      db.transaction("r", db.games, db[currentGame], function() {
+        db.games.get(currentGame).then(function(game) {
+          exports.game = jQuery.extend({}, game);
+        });
+        db[currentGame].each(function(a) {
+          for (let i of Object.keys(a)) {
+            if (exports.body[i] === undefined) {
+              exports.body[i] = [];
+            }
+            exports.body[i].push(a[i]);
+          }
+        });
+      }).then(function() {
+        var builder = [],
+            gameKeys = Object.keys(exports.game),
+            bodyKeys = Object.keys(exports.body);
+
+        builder.push(gameKeys.join(","));
+        builder.push(gameKeys.map((k) => exports.game[k]).join(","));
+        builder.push("\n");
+        builder.push(bodyKeys.join(","));
+        for (let i=0;i<exports.body.id.length;i++) {
+          builder.push(bodyKeys.map((m) => exports.body[m][i]).join(",")); // jshint ignore:line
+        }
+
+        $("#games-emport-text").val(builder.join("\n"));
+        $("#games-export-csv").removeClass("hollow");
+        $("#games-export-json").addClass("hollow");
+        $("#games-emport").foundation("open");
+      }).catch((err) => { console.error(err); });
+      
     });
     
     $("#games-delete").on("click", function(e) {

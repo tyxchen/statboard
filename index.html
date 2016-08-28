@@ -90,8 +90,8 @@
             <div class="row"><p>This could have severe consequences!</p></div>
             <form>
               <div class="row">
-                <a href="#" class="small-5 button alert" data-action="confirm">Yes, I do!</a>
-                <a href="#" class="small-5 button secondary float-right" data-action="cancel" data-close>Nope, get me out of here!</a>
+                <a href="#" class="small-5 columns button alert" data-action="confirm">Yes, I do!</a>
+                <a href="#" class="small-5 columns button secondary float-right" data-action="cancel" data-close>Nope, get me out of here!</a>
               </div>
             </form>
           </div>
@@ -99,8 +99,13 @@
           <div class="large reveal" id="games-emport" data-reveal>
             <h4>Import/Export</h4>
             <form>
-              <textarea id="games-emport-text" style="width:100%;height:100%"></textarea>
-              <a href="#" class="button" id="games-import"><i class="fi-upload"></i> Import</a>
+              <textarea id="games-emport-text" style="width:100%;min-height:300px"></textarea>
+              <div class="row">
+                <a href="#" class="medium-2 columns button float-left" id="games-import"><i class="fi-upload"></i> Import</a>
+                <div class="medium-2 medium-offset-6 columns text-right"><i class="fi-page-export"></i> Export as:</div>
+                <a href="#" class="small-1 columns button" id="games-export-json">JSON</a>
+                <a href="#" class="small-1 columns hollow button" id="games-export-csv">CSV</a>
+              </div>
             </form>
             <button class="close-button" data-close aria-label="Close reveal" type="button">
               <span aria-hidden="true">&times;</span>
