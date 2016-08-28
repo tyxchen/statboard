@@ -3,7 +3,7 @@
   
   "use strict";
 
-  const DB_NAME = "statboard-test8";
+  const DB_NAME = "statboard-test9";
   const DB_UNIQ_KEY = "num";
   
   const stats = ["AB", "BIP", "OB", "2B", "3B", "HR", "K", "FTO", "GO", "PO", "LO", "PFO", "GIDP", "GIFO", "HCn", "HCp", "FO", "Fp", "GBFA", "GBFS", "GBFp", "FFA", "FFS", "FFp", "OGS", "DGS"];
@@ -40,6 +40,12 @@
   };
   
   var DB = {
+    getCurrentGame: function(db) {
+      return parseInt(localStorage.getItem("DB_" + db + "_CURRENT_GAME"));
+    },
+    updateCurrentGame: function(db, game) {
+      localStorage.setItem("DB_" + db + "_CURRENT_GAME", game.toString());
+    },
     getSchema: function(db, verno) {
       return JSON.parse(localStorage.getItem("DB_" + db + "_" + verno + "_SCHEMA"));
     },
@@ -202,7 +208,7 @@
         $("#games-empty-callout").remove();
         
         currentGame = game;
-        localStorage.setItem("DB_CURRENT_GAME", currentGame);
+        DB.updateCurrentGame(DB_NAME, currentGame);
 
         db.games.toArray(populateGames).then(function() {
           $("#select-game").val(game);
@@ -231,8 +237,8 @@
     db.version(DB_VERSION);
     db.open().catch(dbErr);
     db.games.toArray(populateGames).then(function() {
-      if (!!localStorage.getItem("DB_CURRENT_GAME")) {
-        loadGame(localStorage.getItem("DB_CURRENT_GAME"));
+      if (!!DB.getCurrentGame(DB_NAME)) {
+        loadGame(DB.getCurrentGame(DB_NAME));
       }
     });
     
@@ -356,20 +362,20 @@
       store[currentGame] = null;
       
       $("#confirm-action [data-action='confirm']").on("click", function() {
-        db.transaction("rw", db.games, function() {
-          db.games.delete(currentGame);
-        }).then(function() {
-          db.close();
-          db.version(++DB_VERSION).stores(store);
-          db.open().then(function() {
+        db.close();
+        db.version(++DB_VERSION).stores(store);
+        db.open().then(function() {
+          db.transaction("rw", db.games, function() {
+            db.games.delete(currentGame);
+          }).then(function() {
             DB.updateVersion(DB_NAME, DB_VERSION);
             DB.updateSchema(DB_NAME, DB_VERSION, store);
             
             console.log("Updated '%s' succesfully to version %d", DB_NAME, DB_VERSION);
             
             window.location.reload();
-          }).catch(dbErr);
-        }).catch((err) => { console.error(err); });
+          }).catch((err) => { console.error(err); });
+        }).catch(dbErr);
       });
       
       $("#confirm-action .action").text("delete game " + currentGame);
