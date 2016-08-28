@@ -8,7 +8,8 @@
 
     <title>Statboard</title>
 
-    <link rel="stylesheet" href="css/foundation.css">
+    <link rel="stylesheet" href="css/vendor/foundation.css">
+    <link rel="stylesheet" href="css/vendor/foundation-icons.css">
     <link rel="stylesheet" href="css/app.css">
   </head>
   <body>
@@ -36,10 +37,8 @@
               <h5>Game code <select id="select-game"><option>--</option></select></h5>
             </div>
             <div class="large-5 columns button-group float-left">
-              <a href="#" class="button primary" data-open="games-create-new">+ New game</a>
-              <a href="#" class="button primary" data-open="games-emport">Import game</a>
-              <a href="#" class="button primary" id="games-export">Export game</a>
-              <a href="#" class="button alert" id="games-delete">Delete game</a>
+              <a href="#" class="button primary" data-open="games-create-new"><i class="fi-plus"></i> New game</a>
+              <a href="#" class="button primary" data-open="games-emport"><i class="fi-upload"></i> Import game</a>
             </div>
             <div class="medium-4 columns float-right">
               <ul class="tabs float-right" data-tabs id="games-tabs">
@@ -55,13 +54,28 @@
               <div class="tabs-content no-border" data-tabs-content="games-tabs">
                 <div id="games-empty-callout" class="callout secondary text-center"><p>No game selected. <a href="#" data-open="games-create-new">Create a new one?</a></p></div>
                 <div class="tabs-panel is-active" id="games-stats">
-                  <table id="games-stats-table" class="scroll hover games-stats-table"></table>
-                  <div class="row">
+                  <div class="expanded row">
+                    <div class="large-11 small-12 columns">
+                      <table id="games-stats-table" class="scroll hover games-stats-table"></table>
+                    </div>
+                    <div class="large-1 columns text-right">
+                      <div class="stacked button-group" id="games-stats-table-bulk">
+                        <a href="#" class="button primary" data-action="edit">Edit</a>
+                        <a href="#" class="button success" data-action="save" style="display:none">Save</a>
+                      </div>
+                      <hr>
+                      <div class="stacked button-group">
+                        <a href="#" class="button hollow primary" id="games-export">Export game</a>
+                        <a href="#" class="button hollow alert" id="games-delete">Delete game</a>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- <div class="row">
                     <div class="small-6 columns button-group" id="games-stats-table-bulk">
                       <a href="#" class="button primary" data-action="edit">Edit</a>
                       <a href="#" class="button success" data-action="save" style="display:none">Save</a>
                     </div>
-                  </div>
+                  </div> -->
                 </div>
                 <div class="tabs-panel" id="games-lineup">
                 </div>
@@ -86,7 +100,7 @@
             <h4>Import/Export</h4>
             <form>
               <textarea id="games-emport-text" style="width:100%;height:100%"></textarea>
-              <a href="#" class="button" id="games-import">Import</a>
+              <a href="#" class="button" id="games-import"><i class="fi-upload"></i> Import</a>
             </form>
             <button class="close-button" data-close aria-label="Close reveal" type="button">
               <span aria-hidden="true">&times;</span>
@@ -112,7 +126,7 @@
                       <input type='number' data-field='num' min='00' max='99' placeholder='00'>
                     </div>
                     <div class='medium-2 small-3 columns'>
-                      <select data-field='position' onchange='$(this).children().filter(":not([value])").first().remove()'>
+                      <select data-field='position' onchange='$(this).children(":not([value])").first().remove()'>
                         <option>--</option>
                         <option value='BC'>BC</option>
                         <option value='1B'>1B</option>
@@ -140,8 +154,8 @@
                 </div>
               </div>
               <div class="row">
-                <button class="button alert float-left" id="games-stats-table-edit-delete">Delete</button>
-                <button class="button float-right" id="games-stats-table-edit-submit">Submit</button>
+                <button class="button hollow alert float-left" id="games-stats-table-edit-delete"><i class="fi-trash"></i> Delete</button>
+                <button class="button float-right" id="games-stats-table-edit-submit"><i class="fi-check"></i> Submit</button>
               </div>
             </form>
             <button class="close-button" data-close aria-label="Close reveal" type="button">
@@ -201,7 +215,7 @@
               </div>
               <div class="row">
                 <span class="footnote">Stats may be filled in after the game is created.</span>
-                <button class="button float-right" id="games-create-new-submit">Submit</button>
+                <button class="button float-right" id="games-create-new-submit"><i class="fi-check"></i> Submit</button>
               </div>
             </form>
             <button class="close-button" data-close aria-label="Close reveal" type="button">
