@@ -41,7 +41,7 @@
   
   var DB = {
     getCurrentGame: function(db) {
-      return parseInt(localStorage.getItem("DB_" + db + "_CURRENT_GAME"));
+      return localStorage.getItem("DB_" + db + "_CURRENT_GAME");
     },
     updateCurrentGame: function(db, game) {
       localStorage.setItem("DB_" + db + "_CURRENT_GAME", game.toString());
@@ -68,6 +68,11 @@
   var APP = {};
   
   APP.GAMES = function() {
+    console.log(DB_VERSION);
+    var db = new Dexie(DB_NAME); //DB(DB_NAME, DB_VERSION, ["test"], DB_UNIQ_KEY, indexes);
+    var currentGame;
+    var currentGameView = {};
+
     var editRow = function(id) {
       var modal = $("#games-stats-table-edit"),
           header = ["<thead><tr>"],
@@ -119,10 +124,11 @@
       });
     };
     
-    var loadTable = function(players, sortKey, sortDir) {
-      var builder = ["<thead><tr>"];
-
-      sortKey = sortKey || "batting";
+    var loadTable = function(players) {
+      var builder = ["<thead><tr>"],
+          sortKey = $("#games-stats-table").data("sort-key") || "batting",
+          sortDir = $("#games-stats-table").data("sort-dir");
+          
       sortDir = (sortDir !== undefined && sortDir !== null ? sortDir : 1);
       
       if (!Array.isArray(players)) {
@@ -141,10 +147,15 @@
           }
         }
 
-        if (["HCn", "GBFA", "GBFS", "FFA", "FFS"].indexOf(name) === -1) {
-          builder.push("<th data-name='" + ind + "'>");
-          if (stats.indexOf(name) !== -1) {
-            builder.push("<abbr title='" + statDefs[name] + "'>" + (name.slice(-1) === "p" ? name.slice(0, -1) + "%" : name) + "</abbr>");
+        if (["HCn", "GBFA", "GBFS", "FFA", "FFS"].indexOf(ind) === -1) {
+          if (ind === sortKey) {
+            builder.push("<th data-name='" + ind + "' data-sort-dir='" + sortDir + "'>");
+          } else {
+            builder.push("<th data-name='" + ind + "'>");
+          }
+
+          if (stats.indexOf(ind) !== -1) {
+            builder.push("<abbr title='" + statDefs[ind] + "'>" + (name.slice(-1) === "p" ? name.slice(0, -1) + "%" : name) + "</abbr>");
           } else {
             builder.push(name);
           }
@@ -218,11 +229,6 @@
       });
     };
 
-
-    console.log(DB_VERSION);
-    var db = new Dexie(DB_NAME); //DB(DB_NAME, DB_VERSION, ["test"], DB_UNIQ_KEY, indexes);
-    var currentGame;
-    var currentGameView = {};
 
     if (db.tables.length === 0 && db.verno === 0) {
       DB.updateSchema(DB_NAME, 1, {
@@ -396,9 +402,11 @@
             editRow();
           } else if ($t.is("abbr,th")) {
             let sortKey = $t.closest("th").data("name"),
-                sortDir = parseInt($t.closest("th").attr("data-sort-dir")) || -1;
+                sortDir = parseInt($("#games-stats-table").data("sort-dir")) || 1;
             
-            loadTable(currentGameView, sortKey, -sortDir);
+            $("#games-stats-table").data("sort-key", sortKey);
+            $("#games-stats-table").data("sort-dir", -sortDir);
+            loadTable(currentGameView);
             $("th[data-name='" + sortKey + "']").attr("data-sort-dir", -sortDir);
           }
         } else {
