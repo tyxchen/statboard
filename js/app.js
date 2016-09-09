@@ -67,6 +67,19 @@
 
   var APP = {};
   
+  APP.UTIL = {
+    calculateStats: function(player) {
+      player.HCp = (parseInt(player.HCn) / parseInt(player.BIP) * 100).toFixed(1);
+      player.GBFp = (parseInt(player.GBFS) / parseInt(player.GBFA) * 100).toFixed(1);
+      player.FFp = (parseInt(player.FFS) / parseInt(player.FFA) * 100).toFixed(1);
+      player.Fp = ((parseInt(player.GBFp) + parseInt(player.FFp)) / 2).toFixed(1);
+      player.OGS = 0;
+      player.DGS = 0;
+      
+      return player;
+    }
+  };
+  
   APP.GAMES = function() {
     console.log(DB_VERSION);
     var db = new Dexie(DB_NAME); //DB(DB_NAME, DB_VERSION, ["test"], DB_UNIQ_KEY, indexes);
@@ -504,10 +517,12 @@
           player.id = $("#games-stats-table-edit").data("player-id");
         }
         
-        player.HCp = (parseInt(player.HCn) / parseInt(player.BIP) * 100).toFixed(1);
-        player.GBFp = (parseInt(player.GBFS) / parseInt(player.GBFA) * 100).toFixed(1);
-        player.FFp = (parseInt(player.FFS) / parseInt(player.FFA) * 100).toFixed(1);
-        player.Fp = ((parseInt(player.GBFp) + parseInt(player.FFp)) / 2).toFixed(1);
+        // player.HCp = (parseInt(player.HCn) / parseInt(player.BIP) * 100).toFixed(1);
+        // player.GBFp = (parseInt(player.GBFS) / parseInt(player.GBFA) * 100).toFixed(1);
+        // player.FFp = (parseInt(player.FFS) / parseInt(player.FFA) * 100).toFixed(1);
+        // player.Fp = ((parseInt(player.GBFp) + parseInt(player.FFp)) / 2).toFixed(1);
+        
+        player = APP.UTIL.calculateStats(player);
         
         db[game].put(player);
       }).then(function() {
@@ -578,10 +593,12 @@
             player[this.getAttribute("data-field")] = this.value;
           });
           
-          player.HCp = (parseInt(player.HCn) / parseInt(player.BIP) * 100).toFixed(1);
-          player.GBFp = (parseInt(player.GBFS) / parseInt(player.GBFA) * 100).toFixed(1);
-          player.FFp = (parseInt(player.FFS) / parseInt(player.FFA) * 100).toFixed(1);
-          player.Fp = ((parseInt(player.GBFp) + parseInt(player.FFp)) / 2).toFixed(1);
+          // player.HCp = (parseInt(player.HCn) / parseInt(player.BIP) * 100).toFixed(1);
+          // player.GBFp = (parseInt(player.GBFS) / parseInt(player.GBFA) * 100).toFixed(1);
+          // player.FFp = (parseInt(player.FFS) / parseInt(player.FFA) * 100).toFixed(1);
+          // player.Fp = ((parseInt(player.GBFp) + parseInt(player.FFp)) / 2).toFixed(1);
+          
+          player = APP.UTIL.calculateStats(player);
           
           players.push(player);
         });
